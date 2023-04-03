@@ -284,8 +284,9 @@ def parse(hex_data):
 
 
 def thermo_parse(value):
-    ret = { 'heat_mode': 'heat' if value[:2] == '11' else 'off',
-            'away': 'true' if value[2:4] == '01' else 'false',
+#    ret = { 'heat_mode': 'heat' if value[:2] == '11' else 'off',
+    ret = { 'heat_mode': 'heat' if value[:4] == '1100' elif 'away' if value[:4] == '1101' else 'off',
+#            'away': 'true' if value[2:4] == '01' else 'false',
             'set_temp': int(value[4:6], 16) if value[:2] == '11' else int(config.get('User', 'init_temp')),
             'cur_temp': int(value[8:10], 16)}
     return ret
@@ -411,13 +412,15 @@ def mqtt_on_message(mqttc, obj, msg):
     # thermo heat/off : kocom/room/thermo/3/heat_mode/command
     if 'thermo' in topic_d and 'heat_mode' in topic_d:
 #       heatmode_dic = {'heat': '11', 'off': '01'}
-        heatmode_dic = {'heat': '11', 'off': '00'}
+#        heatmode_dic = {'heat': '11', 'off': '00'}
+        heatmode_dic = {'heat': '1100', 'away': '1101', 'off': '0000'}
 
         dev_id = device_h_dic['thermo']+'{0:02x}'.format(int(topic_d[3]))
         q = query(dev_id)
         #settemp_hex = q['value'][4:6] if q['flag']!=False else '14'
         settemp_hex = '{0:02x}'.format(int(config.get('User', 'init_temp'))) if q['flag']!=False else '14'
-        value = heatmode_dic.get(command) + '00' + settemp_hex + '0000000000'
+#        value = heatmode_dic.get(command) + '00' + settemp_hex + '0000000000'
+        value = heatmode_dic.get(command) + settemp_hex + '0000000000'
         send_wait_response(dest=dev_id, value=value, log='thermo heatmode')
 
     # thermo set temp : kocom/room/thermo/3/set_temp/command
@@ -688,7 +691,8 @@ def publish_discovery(dev, sub=''):
 
             'curr_temp_t': 'kocom/room/thermo/{}/state'.format(num),
             'curr_temp_tpl': '{{ value_json.cur_temp }}',
-            'modes': ['off', 'heat'],
+#            'modes': ['off', 'heat'],
+            'modes': ['off', 'away', 'heat'],
             'min_temp': 20,
             'max_temp': 30,
             'ret': 'false',
