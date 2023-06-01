@@ -649,7 +649,7 @@ def publish_discovery(dev, sub=''):
             logtxt='[MQTT Discovery|{}] data[{}]'.format(i, topic)
             mqttc.publish(topic, json.dumps(payload))
             if logtxt != "" and config.get('Log', 'show_mqtt_publish') == 'True':
-            logging.info(logtxt)    
+                logging.info(logtxt)    
 #     elif dev == 'elevator':
 #         topic = 'homeassistant/switch/kocom_wallpad_elevator/config'
 #         payload = {
